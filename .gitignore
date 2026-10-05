@@ -1,0 +1,10 @@
+# Data files are large and come from Kaggle; never commit them
+data/raw/*
+!data/raw/.gitkeep
+
+__pycache__/
+*.pyc
+.venv/
+.env
+.pytest_cache/
+mlruns/

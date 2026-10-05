@@ -1,0 +1,37 @@
+services:
+  warehouse:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: loans
+      POSTGRES_PASSWORD: loans
+      POSTGRES_DB: warehouse
+    ports:
+      - "5433:5432"  # 5433 on your laptop, so it won't clash with a local Postgres
+    volumes:
+      - warehouse_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U loans -d warehouse"]
+      interval: 5s
+      retries: 10
+
+  airflow:
+    image: apache/airflow:2.10.4-python3.11
+    command: standalone
+    depends_on:
+      warehouse:
+        condition: service_healthy
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      PYTHONPATH: /opt/airflow
+      WAREHOUSE_URL: postgresql+psycopg2://loans:loans@warehouse:5432/warehouse
+      # Point this at sample_loans.csv for quick dev runs
+      RAW_DATA_PATH: /opt/airflow/data/raw/accepted_2007_to_2018Q4.csv.gz
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./src:/opt/airflow/src
+      - ./data:/opt/airflow/data
+
+volumes:
+  warehouse_data:
