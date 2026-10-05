@@ -1,3 +1,18 @@
+x-app: &app
+  build: .
+  image: loan-default-app
+  environment:
+    WAREHOUSE_URL: postgresql+psycopg2://loans:loans@warehouse:5432/warehouse
+    MLFLOW_TRACKING_URI: file:/app/mlruns
+  volumes:
+    - ./src:/app/src
+    - ./artifacts:/app/artifacts
+    - ./reports:/app/reports
+    - ./mlruns:/app/mlruns
+  depends_on:
+    warehouse:
+      condition: service_healthy
+
 services:
   warehouse:
     image: postgres:16
@@ -32,6 +47,42 @@ services:
       - ./dags:/opt/airflow/dags
       - ./src:/opt/airflow/src
       - ./data:/opt/airflow/data
+
+  # Step 2: dbt transformations and data tests (run on demand)
+  dbt:
+    build:
+      context: .
+      dockerfile: Dockerfile.dbt
+    image: loan-default-dbt
+    profiles: ["tools"]
+    environment:
+      WAREHOUSE_HOST: warehouse
+    volumes:
+      - ./dbt:/dbt
+    depends_on:
+      warehouse:
+        condition: service_healthy
+
+  # Steps 3, 4, 6: training, SHAP and drift jobs (run on demand)
+  app:
+    <<: *app
+    profiles: ["tools"]
+
+  # Step 5: the risk-score API at http://localhost:8000/docs
+  api:
+    <<: *app
+    profiles: ["serve"]
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+
+  # Experiment tracking UI at http://localhost:5001 (5000 is taken by AirPlay on Macs)
+  mlflow:
+    <<: *app
+    profiles: ["serve"]
+    command: mlflow ui --backend-store-uri /app/mlruns --host 0.0.0.0 --port 5000
+    ports:
+      - "5001:5000"
 
 volumes:
   warehouse_data:

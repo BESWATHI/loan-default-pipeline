@@ -1,0 +1,16 @@
+name: loan_default
+version: "1.0.0"
+config-version: 2
+profile: loan_default
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+target-path: "target"
+clean-targets: ["target", "logs"]
+
+models:
+  loan_default:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table

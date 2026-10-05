@@ -1,0 +1,12 @@
+loan_default:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('WAREHOUSE_HOST', 'warehouse') }}"
+      port: 5432
+      user: loans
+      password: loans
+      dbname: warehouse
+      schema: analytics
+      threads: 4

@@ -1,0 +1,8 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    tables:
+      - name: lending_club_loans
+        description: Raw Lending Club loans loaded by the Airflow ingestion DAG (all columns as text).

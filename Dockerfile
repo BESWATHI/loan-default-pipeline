@@ -1,0 +1,19 @@
+# Image for training, explainability, drift monitoring, the API and the MLflow UI.
+FROM python:3.11-slim
+
+# libgomp1 is the OpenMP runtime XGBoost needs
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY src ./src
+ENV PYTHONPATH=/app \
+    MPLBACKEND=Agg \
+    PYTHONUNBUFFERED=1
+
+EXPOSE 8000
+CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: stg_loans
+    description: Typed and cleaned Lending Club loans.
+    columns:
+      - name: loan_id
+        data_tests: [not_null]
+      - name: loan_amnt
+        data_tests: [not_null]
