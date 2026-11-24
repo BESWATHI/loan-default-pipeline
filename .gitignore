@@ -17,3 +17,4 @@ __pycache__/
 .env
 .pytest_cache/
 .DS_Store
+notebooks/loans_for_rules.csv
