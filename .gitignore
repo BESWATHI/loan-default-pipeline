@@ -18,3 +18,4 @@ __pycache__/
 .pytest_cache/
 .DS_Store
 notebooks/loans_for_rules.csv
+anaconda_projects/
